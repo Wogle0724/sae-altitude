@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>SAE Avalanche</title>
+  <link rel="preload" as="image" href="assets/background.svg" />
+  <link rel="preload" as="image" href="assets/skier.svg" />
+  <link rel="preload" as="image" href="assets/snow.svg" />
+  <link rel="stylesheet" href="https://use.typekit.net/ccj1xho.css">
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="blackout" aria-hidden="true"></div>
+  <div id="presents" aria-hidden="true">SAE&nbsp;Presents</div>
+  <div id="stage" aria-label="Animated mountain scene">
+    <div id="bg" class="fadeable" aria-hidden="true"></div>
+    <!-- Skier follows the slope path -->
+    <svg id="skier" class="skier-svg" viewBox="0 0 100 100" preserveAspectRatio="xMaxYMin meet" aria-hidden="true">      
+      <defs>
+        <path id="slope-path" d="M 100,22
+        C 98,24 96,26 93,30
+        S 88,38 83,46
+        S 70,62 57,76
+        S 40,92 25,100
+        S 10,122 0,125" />
+      </defs>
+      <image id="skier-sprite" href="assets/skier.svg" x="-2" y="-2" width="4" height="4" />
+      <animateMotion
+        xlink:href="#skier-sprite"
+        dur="9s"
+        rotate="auto -35"
+        repeatCount="indefinite"
+        keyTimes="0;0.9;1"
+        values="0;1;1"
+      >
+        <mpath xlink:href="#slope-path" />
+      </animateMotion>
+    </svg>
+    <!-- Seamless two-layer snowfall -->
+    <div id="snow-wrap" class="fadeable" aria-hidden="true">
+      <div class="snow-layer"></div>
+      <div class="snow-layer"></div>
+    </div>
+  </div>
+
+  <!-- Answer badge that appears at the top after correct answer -->
+  <div id="answer-badge" aria-live="polite" aria-hidden="true"></div>
+
+  <!-- Quiz overlay -->
+  <section id="quiz" role="dialog" aria-modal="true" aria-labelledby="q-text">
+    <div class="quiz-card">
+      <h1 id="q-text">When skiers rise above the clouds to conquer the mountain’s peak, what word measures their height above sea level?</h1>
+      <div class="options" role="group" aria-label="Choices">
+        <button class="option" data-correct="false">LATITUDE</button>
+        <button class="option" data-correct="false">SUMMIT</button>
+        <button class="option" data-correct="true">ALTITUDE</button>
+        <button class="option" data-correct="false">MAGNITUDE</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Combined altitude title and info container -->
+  <section id="altitude-container" aria-hidden="true">
+    <div id="altitude-title">ALTITUDE</div>
+    <main id="info" aria-live="polite" aria-hidden="true"></main>
+  </section>
+
+  <script src="script.js"></script>
+  <audio id="bgm" src="assets/song.mp3" preload="auto"></audio>
+</body>
+</html>

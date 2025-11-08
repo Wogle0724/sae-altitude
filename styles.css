@@ -1,0 +1,374 @@
+:root{
+  --bg:#0b0f19;
+  --card:#dff5ff;
+  --text:#f5f7ff;
+  --accent:#8fd3ff;
+  --good:#8bffb5;
+  --bad:#ff6b6b;
+  --navy:#528494;
+  --light:#71acc2;
+  --brown:#e7decf;
+}
+
+*{box-sizing:border-box}
+html,body{
+  height:100%;
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Inter, Arial, sans-serif;
+  overflow:hidden; /* keep scene immersive */
+}
+
+/* ---------- Scene ---------- */
+#stage{
+  position:fixed;
+  inset:0;
+  overflow:hidden;
+}
+
+/* Full-bleed background image container */
+#bg{
+  position:absolute;
+  inset:0;
+  background-image: url('assets/background.svg');
+  background-size: cover;        /* fill the entire viewport */
+  background-position: right center;   /* center focal point */
+  background-repeat: no-repeat;
+  z-index:0;
+}
+/* Make inline skier SVG fill the stage */
+.skier-svg{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  z-index:2;
+  pointer-events:none;
+  overflow: visible;
+  opacity: 0;
+  transition: opacity .6s ease;
+}
+
+.skier-svg.visible{ opacity: 1; }
+
+/* ---------- Quiz ---------- */
+#quiz{
+  position:fixed;
+  inset:0;
+  display:grid;
+  place-items:center;
+  z-index:4;
+  transition: opacity .5s ease, visibility .5s ease;
+}
+#quiz.hidden{
+  opacity:0;
+  visibility:hidden;
+}
+
+ .quiz-card{
+   width:min(720px, 92vw);
+   background: radial-gradient(circle at top left, rgba(255,255,255,0.35) 0%, rgba(230,245,255,0.25) 40%, rgba(200,230,255,0.18) 100%);
+   backdrop-filter: blur(10px);
+   border: 1px solid rgba(255,255,255,.3);
+   border-radius: 16px;
+   padding: 28px 24px;
+   appearance: hidden;
+ }
+
+ .quiz-card h1{
+   margin: 0 0 14px;
+   font-weight: 700;
+   line-height: 1.15;
+   letter-spacing: .4px;
+   text-align: center;
+   color: #e8f8ff;
+ }
+
+.options{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap:12px;
+  margin-top:10px;
+}
+
+ .option{
+   appearance:none;
+   border:1px solid rgba(255,255,255,.25);
+   background: rgba(240,250,255,0.45);
+   color:#e6f7ff;
+   padding:14px 16px;
+   border-radius:12px;
+   font-size:16px;
+   cursor:pointer;
+   transition: transform .08s ease, border-color .2s ease, background .2s ease, color .2s ease, box-shadow .2s ease;
+ }
+ .option:hover{
+   transform: translateY(-1px);
+   border-color: rgba(255,255,255,.6);
+   box-shadow: 0 0 16px rgba(180,240,255,.4);
+ }
+ .option.correct{
+   background: linear-gradient(180deg, rgba(180,255,220,0.6), rgba(100,220,180,0.3));
+   border-color: rgba(160,255,210,.8);
+   color: #e9fff2;
+   box-shadow: 0 0 18px rgba(160,255,210,.4);
+ }
+ .option.wrong{
+   background: linear-gradient(180deg, rgba(255,180,180,0.5), rgba(255,120,120,0.3));
+   border-color: rgba(255,180,180,.6);
+   color: #ffeaea;
+   box-shadow: 0 0 14px rgba(255,160,160,.3);
+ }
+.shake{
+  animation: shake .35s ease;
+}
+
+ .hint{
+   margin: 14px 2px 0;
+   text-align: center;
+   opacity: .85;
+   font-size: 14px;
+   color: #d9f2ff;
+ }
+
+/* ---------- Answer badge (after correct) ---------- */
+#answer-badge{
+  position:fixed;
+  top:14px;
+  left:50%;
+  transform: translateX(-50%) scale(.9);
+  z-index:4;
+  color: var(--navy);
+  border-radius: 999px;
+  padding:10px 16px;
+  font-weight:700;
+  letter-spacing:.2px;
+  opacity:0;
+  pointer-events:none;
+  transition: opacity .5s ease, transform .5s ease;
+}
+#answer-badge.visible{
+  opacity:1;
+  transform: translateX(-50%) scale(1);
+}
+
+/* ---------- Answer float animation ---------- */
+.answer-float{
+  position: fixed;
+  z-index: 5; /* above quiz */
+  padding: 10px 16px;
+  border-radius: 999px;
+  font-weight: 800;
+  letter-spacing: .2px;
+  background: #10192ded;
+  color: var(--good);
+  border: 1px solid #2dd07e66;
+  box-shadow: 0 12px 40px rgba(0,0,0,.45);
+  will-change: transform, top, left, width, height, opacity;
+  transition: top .6s ease, left .6s ease, transform .6s ease, width .6s ease, height .6s ease, opacity .6s ease;
+  pointer-events: none;
+}
+.answer-float.to-top{
+  top: 14px !important;
+  left: 50% !important;
+  transform: translateX(-50%) scale(1.6);
+  width: auto !important;
+  height: auto !important;
+}
+
+/* ---------- Info (typed content) ---------- */
+#info{
+  position: static;          /* let the parent flex container size to it */
+  opacity:0;
+  transition: opacity .6s ease .2s;
+  background: none;          /* no panel */
+  padding: 0;                /* spacing handled by #altitude-container gap */
+  max-width: 60ch;           /* optional: keep readable line length */
+  width: 100%;
+  color: var(--navy);
+  font-family: "macho", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+#info.visible{ opacity:1; }
+
+
+/* ---------- Altitude container ---------- */
+#altitude-container{
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  right: auto;
+  bottom: auto;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 0;
+  opacity: 0;
+  transform: translate(-50%, -50%); /* center on screen */
+  transition:
+    opacity .6s ease,
+    top .6s ease,
+    left .6s ease,
+    transform .6s ease;
+  pointer-events: none;
+  width: min(92vw, 1200px);
+  max-width: min(92vw, 1200px);
+  max-height: 100vh;
+  overflow: visible;    /* if content exceeds viewport, allow scrolling rather than clipping */
+  container-type: inline-size; /* enable cqi units for children */
+}
+
+/* While centered, give the title its own inline padding so letters never clip,
+   without changing the container's box (prevents horizontal jump on dock). */
+#altitude-container:not(.dock) #altitude-title{
+  padding-inline: clamp(20px, 5vw, 60px);
+  transition: margin 1s ease, padding 1s ease;
+}
+#altitude-container.visible{
+  opacity: 1;
+  pointer-events: auto; 
+}
+/* Docked state: move whole container to top-left with padding */
+#altitude-container.dock{
+  top: 0;
+  left: 0;
+  transform: translate(0, 0);
+  padding: 0;                  /* remove padding so the title isn't clipped */
+  margin: clamp(16px, 4vh, 40px) clamp(20px, 5vw, 64px);
+  align-items: flex-start;
+  text-align: left;
+}
+
+/* ---------- Altitude title ---------- */
+#altitude-title{
+  font-family: "monte-stella-turbo", sans-serif;
+  font-weight: 800;
+  font-style: normal;
+  /* Fallback: viewport-based size */
+  font-size: clamp(32px, 9vw, 120px);
+  line-height: 0.9;
+  color: var(--navy);
+  letter-spacing: .02em;
+  opacity: 0;
+  transform: scale(0.85);
+  transform-origin: center;
+  transition: opacity .5s ease, transform .6s ease, margin 1s ease, padding .6s ease;
+  max-width: 100%;
+  white-space: normal;
+  text-wrap: balance;
+  display: inline-block;
+  margin: 0 auto;
+}
+@supports (font-size: 1cqi){
+  /* Use the container inline-size to size the headline so it never overflows */
+  #altitude-title{
+    font-size: clamp(32px, 12cqi, 120px);
+  }
+}
+#altitude-title.show{ opacity: 1; transform: scale(1.2); }
+
+/* When docked, align the title to the top-left and remove the center scale */
+#altitude-container.dock #altitude-title{
+  transform: scale(1);
+  padding: 0;
+  margin: 0;
+}
+
+/* Fade helpers for bg & snow */
+.fadeable{
+  opacity: 0;
+  transition: opacity .6s ease;
+}
+.fadeable.visible{ opacity: 1; }
+
+/* ---------- Blackout overlay ---------- */
+#blackout{
+  position: fixed;
+  inset: 0;
+  background: #000;
+  opacity: 0;
+  transition: opacity .6s ease;
+  z-index: 9; /* above everything during transition */
+  pointer-events: none;
+}
+#blackout.visible{ opacity: 1; }
+
+/* ---------- "SAE Presents" overlay ---------- */
+#presents{
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 11;                /* above blackout */
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .4s ease;
+  font-family: "monte-stella-turbo", sans-serif;
+  font-weight: 800;
+  font-style: normal;
+  font-size: clamp(28px, 6vw, 84px);
+  letter-spacing: .02em;
+  color: var(--text);
+  text-align: center;
+}
+#presents.visible{ opacity: 1; }
+
+/* Start snow paused; only run when we add .run on the wrapper */
+/* default delay is 0s; both layers run simultaneously when .run is added */
+#snow-wrap .snow-layer{
+  animation-play-state: paused;
+}
+#snow-wrap.run .snow-layer{
+  animation-play-state: running;
+}
+
+/* ---------- Keyframes ---------- */
+@keyframes shake{
+  0%{ transform: translateX(0) }
+  20%{ transform: translateX(-6px) }
+  40%{ transform: translateX(6px) }
+  60%{ transform: translateX(-4px) }
+  80%{ transform: translateX(4px) }
+  100%{ transform: translateX(0) }
+}
+
+/* ---------- Responsive tweaks ---------- */
+@media (max-width: 640px){
+  .options{ grid-template-columns: 1fr; }
+  #mountain{ width: 130vw; }
+}
+
+/* ---------- Seamless snowfall (two layers) ---------- */
+#snow-wrap{
+  position:absolute;
+  inset:0;
+  z-index:3;
+  pointer-events:none;
+  overflow:hidden;
+}
+.snow-layer{
+  position:absolute;
+  left:0;
+  top:0;
+  width:100%;
+  height:100%;
+  background-image: url('assets/snow.svg');
+  background-size: cover;       /* fill the entire viewport without gaps */
+  background-repeat: no-repeat;
+  background-position: center top;
+  animation: snow-loop 12s linear infinite;
+  will-change: transform;
+}
+/* second layer starts mid-cycle so it is already moving */
+#snow-wrap .snow-layer:nth-child(2){
+  animation-delay: -6s; /* negative delay = begins halfway through immediately */
+}
+@keyframes snow-loop{
+  0%   { transform: translateY(-100%); }  /* start above the screen */
+  100% { transform: translateY(100%); }   /* end below the screen */
+}
