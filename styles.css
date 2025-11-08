@@ -77,7 +77,7 @@ html,body{
  }
 
  .quiz-card h1{
-   margin: 0 0 14px;
+   margin: 0 0 20px;
    font-weight: 700;
    line-height: 1.15;
    letter-spacing: .4px;
@@ -264,6 +264,7 @@ html,body{
   display: inline-block;
   margin: 0 auto;
 }
+
 @supports (font-size: 1cqi){
   /* Use the container inline-size to size the headline so it never overflows */
   #altitude-title{
@@ -371,4 +372,21 @@ html,body{
 @keyframes snow-loop{
   0%   { transform: translateY(-100%); }  /* start above the screen */
   100% { transform: translateY(100%); }   /* end below the screen */
+}
+
+@media (max-width: 640px){
+  #altitude-title{
+    text-shadow: 0 0 8px rgba(255, 255, 255, 1);
+    transition: text-shadow .6s ease;
+    transform: scale(1.2);
+  }
+  #altitude-container.dock #altitude-title{
+    text-shadow: 0 0 8px rgba(255, 255, 255, 0.4);
+  }
+  #skier {
+    transform: translateY(15vh) scale(1.2);
+  }
+  #presents{
+    transform: scale(1.4);
+  }
 }
