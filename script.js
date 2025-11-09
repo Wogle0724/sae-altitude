@@ -48,28 +48,23 @@ options.forEach(btn => {
     }, 800);
 
     // === New flow ===
-    // T+2s: show "SAE Presents" over black
+    // T+2.6s: neon blink/glitch "SAE Presents" in and out over black
     setTimeout(() => {
-      presents.classList.add('visible');
-      presents.setAttribute('aria-hidden', 'false');
+      neonBlink(presents, { inMs: 1100, holdMs: 500, outMs: 900, out: true });
     }, 2600);
 
-    // T+3s: hide "SAE Presents"
     setTimeout(() => {
-      presents.classList.remove('visible');
-    }, 4600);
-
-    setTimeout(() => {
-      snow.classList.add('visible');
+      // Glitch in snow wrapper (then start the run)
+      neonBlink(snow, { inMs: 900, holdMs: 0, out: false });
       snow.classList.add('run');
       blackout.classList.remove('visible');
     }, 8600);
 
     // T+5s: start snowfall (still black), then reveal bg & skier and lift blackout
     setTimeout(() => {
-      // reveal the mountain and skier, and remove blackout to show them
-      bg.classList.add('visible');
-      setTimeout(() => { skierSvg.classList.add('visible'); }, 200);
+      // Glitch in background and skier (no fades)
+      neonBlink(bg, { inMs: 900, holdMs: 0, out: false });
+      setTimeout(() => { neonBlink(skierSvg, { inMs: 900, holdMs: 0, out: false }); }, 200);
     }, 11000);
 
     // T+8s: show centered ALTITUDE container/title
@@ -77,8 +72,10 @@ options.forEach(btn => {
       altitudeContainer.classList.add('visible');
       altitudeContainer.setAttribute('aria-hidden', 'false');
 
-      title.setAttribute('aria-hidden', 'false');
-      title.classList.add('show');
+      // Keep size consistent during blink: set final scale first, keep opacity 0, then glitch in
+      title.style.opacity = 0;           // prevent a 1-frame flash
+      title.classList.add('show');       // apply final centered scale (1.2x) before blinking
+      neonBlink(title, { inMs: 1100, holdMs: 0, out: false }); // blink controls opacity
 
       // T+11s: dock container to top-left, then type after transition ends
       setTimeout(() => {
@@ -88,12 +85,13 @@ options.forEach(btn => {
           if (evt.target !== altitudeContainer) return;
           altitudeContainer.removeEventListener('transitionend', onDocked);
 
-          info.classList.add('visible');
+          // Glitch in the info block (then type lines)
+          neonBlink(info, { inMs: 700, holdMs: 0, out: false });
           info.setAttribute('aria-hidden', 'false');
           typeSequence([
-            { text: 'SAE ALTITUDE 2025' },
             { text: 'SATURDAY · DEC 5 · 10:00 PM' },
             { text: 'House 6 · SAE' },
+            { text: 'Feat. Aidan Emerson, AMXLIA' },
           ], 24);
         };
         altitudeContainer.addEventListener('transitionend', onDocked);
@@ -143,6 +141,48 @@ async function typeText(text, el, stepDelay){
 }
 
 function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+/**
+ * Neon blink/glitch: flicker in, optional hold, then flicker out.
+ * If opts.out === false, it will only flicker in.
+ * @param {HTMLElement} el
+ * @param {{inMs?:number, holdMs?:number, outMs?:number, out?:boolean, onDone?:()=>void}} opts
+ */
+async function neonBlink(el, opts = {}){
+  const { inMs = 1100, holdMs = 600, outMs = 900, out = true, onDone } = opts;
+  if (!el) return;
+  // Ensure base style for glow
+  el.classList.add('neon-base');
+  // Make sure it's visible (not aria-hidden) for screen readers during the blink
+  el.setAttribute('aria-hidden', 'false');
+
+  // Reset any prior state
+  el.classList.remove('neon-in','neon-out','visible');
+
+  // Flicker in
+  el.classList.add('neon-in');
+  await sleep(inMs);
+
+  // Optional steady hold (fully on)
+  if (holdMs > 0) await sleep(holdMs);
+
+  if (out){
+    // Flicker out
+    el.classList.remove('neon-in');
+    el.classList.add('neon-out');
+    await sleep(outMs);
+    // After out, hide the element again
+    el.classList.remove('neon-out');
+    el.style.opacity = 0;
+    el.setAttribute('aria-hidden', 'true');
+  }else{
+    // Leave it fully on at the end of the "in" sequence
+    el.classList.remove('neon-in');
+    el.style.opacity = 1;
+  }
+
+  if (typeof onDone === 'function') onDone();
+}
 
 /* ---------- Audio helpers (bgm) ---------- */
 function audioFadeIn(audio, target = 0.6, ms = 1200){
