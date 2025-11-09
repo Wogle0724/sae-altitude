@@ -196,6 +196,7 @@ html,body{
 
 
 /* ---------- Altitude container ---------- */
+/* Use grid so title/date/guest overlap perfectly in the same spot */
 #altitude-container{
   position: fixed;
   top: 50%;
@@ -203,24 +204,33 @@ html,body{
   right: auto;
   bottom: auto;
   z-index: 10;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
+  display: grid;               /* stack all child elements in same grid cell */
+  place-items: center;         /* center both horizontally & vertically */
   text-align: center;
   padding: 0;
   opacity: 0;
-  transform: translate(-50%, -50%); /* center on screen */
-  transition:
-    top .6s ease,
-    left .6s ease,
-    transform .6s ease;
+  transform: translate(-50%, -50%);
+  transition: top .6s ease, left .6s ease, transform .6s ease;
   pointer-events: none;
   width: min(92vw, 1200px);
   max-width: min(92vw, 1200px);
   max-height: 100vh;
-  overflow: visible;    /* if content exceeds viewport, allow scrolling rather than clipping */
-  container-type: inline-size; /* enable cqi units for children */
+  overflow: visible;
+  container-type: inline-size;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 8px;
+}
+
+/* Make all 3 headline elements share the same centered position */
+#altitude-title,
+#altitude-date,
+#altitude-guest{
+  grid-area: 1 / 1;           /* occupy the same cell */
+  justify-self: center;
+  align-self: center;
+  margin: 0;                  /* remove vertical offset */
 }
 
 /* While centered, give the title its own inline padding so letters never clip,
@@ -263,12 +273,46 @@ html,body{
   text-wrap: balance;
   display: inline-block;
   margin: 0 auto;
-  text-shadow: none !important;
+  text-shadow: none;
+}
+
+/* Big date and guest use the same font and scale as the title */
+#altitude-date,
+#altitude-guest{
+  font-family: "monte-stella-turbo", sans-serif;
+  font-weight: 800;
+  font-style: normal;
+  /* Match the title's sizing */
+  font-size: clamp(32px, 9vw, 120px);
+  line-height: 1;
+  color: var(--navy);
+  letter-spacing: .02em;
+  opacity: 0;
+  transform: none;
+  transform-origin: center;
+  transition: opacity .6s ease;
+  margin: 0;
+  text-align: center;
+  text-shadow: none;
+  white-space: nowrap;    /* force single line */
+  max-width: 100%;
+  display: block;
+  overflow: hidden;
+  text-overflow: clip;
+}
+#altitude-date.show,
+#altitude-guest.show{
+  opacity: 1;
+  transform: none;
 }
 
 @supports (font-size: 1cqi){
   /* Use the container inline-size to size the headline so it never overflows */
   #altitude-title{
+    font-size: clamp(32px, 12cqi, 120px);
+  }
+  #altitude-date,
+  #altitude-guest{
     font-size: clamp(32px, 12cqi, 120px);
   }
 }
@@ -364,11 +408,25 @@ html,body{
 }
 #presents.visible{ opacity: 1; }
 
-.neon-glow{ text-shadow:
-    0 0 0.04em rgba(255,255,255,.75),
-    0 0 0.12em rgba(173,216,230,.65),
-    0 0 0.35em rgba(143,211,255,.55);
+/* Full-screen ALTITUDE flash overlay (uses title font + presents glow) */
+#altitude-flash{
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 12; /* above blackout */
+  pointer-events: none;
+  opacity: 0;
+  transition: none;
+  font-family: "monte-stella-turbo", sans-serif;
+  font-weight: 800;
+  font-style: normal;
+  font-size: clamp(36px, 9vw, 120px);
+  letter-spacing: .02em;
+  color: var(--text);
+  text-align: center;
 }
+#altitude-flash.visible{ opacity: 1; }
 
 /* Start snow paused; only run when we add .run on the wrapper */
 /* default delay is 0s; both layers run simultaneously when .run is added */
@@ -393,14 +451,17 @@ html,body{
 @media (max-width: 640px){
   .options{ grid-template-columns: 1fr; }
   #mountain{ width: 130vw; }
-  #altitude-title{
+  #altitude-title,
+  #altitude-date,
+  #altitude-guest{
     transition: text-shadow .6s ease;
     transform: scale(1.2);
+    text-shadow:
+      0 0 6px rgba(255,255,255,.28),
+      0 0 2px rgba(255,255,255,.55);
   }
-  #altitude-container.dock #altitude-title{
-  }
-  #skier {
-    transform: translateY(15vh) scale(1.2);
+  .skier-svg{
+    transform: translateY(20vh) scale(1.15);
   }
   #presents{
     transform: scale(1.4);

@@ -9,6 +9,12 @@
   <link rel="preload" as="image" href="assets/snow.svg" />
   <link rel="stylesheet" href="https://use.typekit.net/ccj1xho.css">
   <link rel="stylesheet" href="styles.css" />
+    <!-- Favicon -->
+  <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="assets/favicon.png">
+  <link rel="shortcut icon" href="assets/favicon.png">
+  <!-- Optional iOS home screen icon (uses same file) -->
+  <link rel="apple-touch-icon" href="assets/favicon.png">
 </head>
 <body>
   <div id="blackout" aria-hidden="true"></div>
@@ -18,12 +24,16 @@
     <!-- Skier follows the slope path -->
     <svg id="skier" class="skier-svg" viewBox="0 0 100 100" preserveAspectRatio="xMaxYMin meet" aria-hidden="true">      
       <defs>
-        <path id="slope-path" d="M 100,22
-        C 98,24 96,26 93,30
-        S 88,38 83,46
-        S 70,62 57,76
-        S 40,92 25,100
-        S 10,122 0,125" />
+        <!-- Wavier path with gentle side-to-side turns -->
+        <path id="slope-path" d="M 100,20
+          C 96,22 92,24 90,28
+          S 84,36 78,42
+          S 70,50 64,56
+          S 56,64 50,70
+          S 42,78 36,84
+          S 28,92 22,98
+          S 14,106 8,112
+          S 0,120 -6,126" />
       </defs>
       <image id="skier-sprite" href="assets/skier.svg" x="-2" y="-2" width="4" height="4" />
       <animateMotion
@@ -63,10 +73,13 @@
   <!-- Combined altitude title and info container -->
   <section id="altitude-container" aria-hidden="true">
     <div id="altitude-title">ALTITUDE</div>
+    <div id="altitude-date" aria-hidden="true"></div>
+    <div id="altitude-guest" aria-hidden="true"></div>
     <main id="info" aria-live="polite" aria-hidden="true"></main>
   </section>
 
   <script src="script.js"></script>
   <audio id="bgm" src="assets/song.mp3" preload="auto"></audio>
+  <div id="altitude-flash" aria-hidden="true">ALTITUDE</div>
 </body>
 </html>

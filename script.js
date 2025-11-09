@@ -27,13 +27,18 @@ options.forEach(btn => {
       }
     });
     const title = document.getElementById('altitude-title');
+    const dateBig = document.getElementById('altitude-date');
+    const guestBig = document.getElementById('altitude-guest');
     const altitudeContainer = document.getElementById('altitude-container');
     const bg = document.getElementById('bg');
     const snow = document.getElementById('snow-wrap');
     const blackout = document.getElementById('blackout');
     const skierSvg = document.getElementById('skier');
     const presents = document.getElementById('presents');
+    const altitudeFlash = document.getElementById('altitude-flash');
     const bgm = document.getElementById('bgm');
+    const BIG_DATE_TEXT  = 'SAT · DEC 5 · 10:00 PM';
+    const BIG_GUEST_TEXT = 'FT. Aidan Emerson, AMXLIA';
 
     btn.classList.add('correct');
 
@@ -67,80 +72,99 @@ options.forEach(btn => {
       setTimeout(() => { neonBlink(skierSvg, { inMs: 900, holdMs: 0, out: false }); }, 200);
     }, 11000);
 
-    // T+8s: show centered ALTITUDE container/title
+    // T+13s: show centered ALTITUDE title big, then flash each line in/out with gaps
     setTimeout(() => {
       altitudeContainer.classList.add('visible');
       altitudeContainer.setAttribute('aria-hidden', 'false');
-
-      // Keep size consistent during blink: set final scale first, keep opacity 0, then glitch in
-      title.style.opacity = 0;           // prevent a 1-frame flash
-      title.classList.add('show');       // apply final centered scale (1.2x) before blinking
-      neonBlink(title, { inMs: 1100, holdMs: 0, out: false }); // blink controls opacity
-
-      // T+11s: dock container to top-left, then type after transition ends
-      setTimeout(() => {
-        altitudeContainer.classList.add('dock');
-
-        const onDocked = (evt) => {
-          if (evt.target !== altitudeContainer) return;
-          altitudeContainer.removeEventListener('transitionend', onDocked);
-
-          // Glitch in the info block (then type lines)
-          neonBlink(info, { inMs: 700, holdMs: 0, out: false });
-          info.setAttribute('aria-hidden', 'false');
-          typeSequence([
-            { text: 'SATURDAY · DEC 5 · 10:00 PM' },
-            { text: 'House 6 · SAE' },
-            { text: 'Feat. Aidan Emerson, AMXLIA' },
-          ], 24);
-        };
-        altitudeContainer.addEventListener('transitionend', onDocked);
-      }, 4000);
+  
+      (async () => {
+        // Title flashes in, then out
+        title.classList.add('show');
+        await neonBlink(title, { inMs: 900, holdMs: 400, outMs: 700, out: true });
+        await sleep(2000);
+  
+        // Date flashes in, then out
+        dateBig.textContent = BIG_DATE_TEXT;
+        dateBig.classList.add('show');
+        dateBig.setAttribute('aria-hidden', 'false');
+        shrinkToFitOneLine(dateBig, { minPx: 24, paddingFactor: 0.98 });
+        await neonBlink(dateBig, { inMs: 900, holdMs: 400, outMs: 700, out: true });
+        await sleep(2000);
+  
+        // Guest flashes in, then out
+        guestBig.textContent = BIG_GUEST_TEXT;
+        guestBig.classList.add('show');
+        guestBig.setAttribute('aria-hidden', 'false');
+        shrinkToFitOneLine(guestBig, { minPx: 24, paddingFactor: 0.98 });
+        await neonBlink(guestBig, { inMs: 900, holdMs: 400, outMs: 700, out: true });
+        await sleep(2000);
+  
+        // Fade to black
+        blackout.classList.add('visible');
+        await sleep(800);
+  
+        // Start continuous random flashing ALTITUDE on loop over black
+        altitudeFlash.textContent = 'ALTITUDE';
+        startRandomAltitudeFlash(altitudeFlash);
+      })();
     }, 13000);
   });
 });
 
 /**
- * Type a list of lines, one after the other.
- * @param {Array<{text:string, cls?:string}>} lines
- * @param {number} cps characters per second (approx)
+ * Shrink the element's font-size just enough to fit on one line.
+ * Starts from the computed size (matching the title) and only shrinks if needed.
  */
-function typeSequence(lines, cps=30){
-  const delay = 1000 / cps;
+function shrinkToFitOneLine(el, { minPx = 24, paddingFactor = 0.98 } = {}){
+  if (!el) return;
+  const parent = el.parentElement;
+  if (!parent) return;
+  el.style.whiteSpace = 'nowrap';
+  el.style.display = 'block';
 
-  (async () => {
-    for (const line of lines){
-      const p = document.createElement('p');
-      p.className = `line${line.cls ? ' ' + line.cls : ''}`;
-      info.appendChild(p);
-      await typeText(line.text, p, delay);
-      await sleep(250);
+  // Start from whatever CSS computed (same as title)
+  const computed = parseFloat(getComputedStyle(el).fontSize) || 96;
+  let lo = minPx, hi = computed;
+
+  // If it already fits at computed size, keep it
+  el.style.fontSize = hi + 'px';
+  if (el.scrollWidth <= parent.clientWidth * paddingFactor) return;
+
+  // Binary search downwards until it fits
+  for (let i = 0; i < 12; i++){
+    const mid = (lo + hi) / 2;
+    el.style.fontSize = mid + 'px';
+    const fits = el.scrollWidth <= parent.clientWidth * paddingFactor;
+    if (fits){
+      lo = mid;
+    }else{
+      hi = mid;
     }
-  })();
-}
-
-/**
- * Progressive typewriter into an element.
- * Uses requestAnimationFrame with time budget for steadier typing.
- */
-async function typeText(text, el, stepDelay){
-  return new Promise(resolve => {
-    let i = 0;
-    const tick = () => {
-      if (i >= text.length) return resolve();
-      // type a few chars per frame based on delay
-      let typed = 0;
-      while (typed < 2 && i < text.length){
-        el.textContent += text[i++];
-        typed++;
-      }
-      setTimeout(() => requestAnimationFrame(tick), stepDelay);
-    };
-    tick();
-  });
+  }
+  el.style.fontSize = Math.max(minPx, Math.floor(lo)) + 'px';
 }
 
 function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+/**
+ * Start a continuous random flash loop for an element using neonBlink.
+ * Returns a stopper function if needed in the future.
+ */
+function startRandomAltitudeFlash(el){
+  let running = true;
+  (async () => {
+    // Ensure glow base is applied
+    el.classList.add('neon-base');
+    while (running){
+      const inMs = 700 + Math.floor(Math.random()*500);   // 700–1200ms
+      const holdMs = 150 + Math.floor(Math.random()*400); // 150–550ms
+      const outMs = 500 + Math.floor(Math.random()*500);  // 500–1000ms
+      await neonBlink(el, { inMs, holdMs, outMs, out: true });
+      await sleep(300 + Math.floor(Math.random()*500));   // 300–800ms pause
+    }
+  })();
+  return () => { running = false; };
+}
 
 /**
  * Neon blink/glitch: flicker in, optional hold, then flicker out.
@@ -262,4 +286,15 @@ document.addEventListener('visibilitychange', () => {
   const skier = document.getElementById('skier');
   if (!skier) return;
   skier.style.animationPlayState = document.hidden ? 'paused' : 'running';
+});
+
+window.addEventListener('resize', () => {
+  const dateEl = document.getElementById('altitude-date');
+  const guestEl = document.getElementById('altitude-guest');
+  if (dateEl && dateEl.offsetParent && dateEl.style.opacity !== '0'){
+    shrinkToFitOneLine(dateEl, { minPx: 24, paddingFactor: 0.98 });
+  }
+  if (guestEl && guestEl.offsetParent && guestEl.style.opacity !== '0'){
+    shrinkToFitOneLine(guestEl, { minPx: 24, paddingFactor: 0.98 });
+  }
 });
