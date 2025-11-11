@@ -8,6 +8,7 @@
   <link rel="preload" as="image" href="assets/skier.svg" />
   <link rel="preload" as="image" href="assets/snow.svg" />
   <link rel="stylesheet" href="https://use.typekit.net/ccj1xho.css">
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&amp;display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css" />
     <!-- Favicon -->
   <link rel="icon" type="image/png" sizes="32x32" href="assets/favicon.png">
@@ -60,7 +61,7 @@
   <!-- Quiz overlay -->
   <section id="quiz" role="dialog" aria-modal="true" aria-labelledby="q-text">
     <div class="quiz-card">
-      <h1 id="q-text">When skiers rise above the clouds to conquer the mountain’s peak, what word measures their height above sea level?</h1>
+      <h1 id="q-text">What's it called when a party transcends to new heights, elevating the bar?</h1>
       <div class="options" role="group" aria-label="Choices">
         <button class="option" data-correct="false">LATITUDE</button>
         <button class="option" data-correct="false">SUMMIT</button>
@@ -81,5 +82,16 @@
   <script src="script.js"></script>
   <audio id="bgm" src="assets/song.mp3" preload="auto"></audio>
   <div id="altitude-flash" aria-hidden="true">ALTITUDE</div>
+
+  <!-- Centered speaker overlay (large) -->
+  <div id="sound-overlay" aria-hidden="true">
+    <svg id="speaker-inline" viewBox="0 0 24 24" role="img" aria-label="Sound on animation">
+      <!-- Speaker body -->
+      <polygon points="3,10 7,10 11,7 11,17 7,14 3,14" class="spk" />
+      <!-- Bars -->
+      <path d="M14 9 A3 3 0 0 1 14 15" class="bar bar1"/>
+      <path d="M17 7 A6 6 0 0 1 17 17" class="bar bar2"/>
+    </svg>
+  </div>
 </body>
 </html>

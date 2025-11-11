@@ -91,8 +91,7 @@ html,body{
   gap:12px;
   margin-top:10px;
 }
-
- .option{
+  .option{
    appearance:none;
    border:1px solid rgba(255,255,255,.25);
    background: rgba(240,250,255,0.45);
@@ -103,6 +102,14 @@ html,body{
    cursor:pointer;
    transition: transform .08s ease, border-color .2s ease, background .2s ease, color .2s ease, box-shadow .2s ease;
  }
+
+/* Make the correct answer (ALTITUDE) use the script stack even without extra class */
+.options button[data-correct="true"]{
+  font-family: "Zapfino", "Apple Chancery", "Snell Roundhand", "Great Vibes", "Brush Script MT", "Segoe Script", cursive;
+  font-size: 0.7em;
+  padding: 0;
+  padding-top: 0.6em;
+}
  .option:hover{
    transform: translateY(-1px);
    border-color: rgba(255,255,255,.6);
@@ -231,6 +238,9 @@ html,body{
   justify-self: center;
   align-self: center;
   margin: 0;                  /* remove vertical offset */
+  text-shadow:
+  0 0 6px rgba(255,255,255,.28),
+  0 0 2px rgba(255,255,255,.55);
 }
 
 /* While centered, give the title its own inline padding so letters never clip,
@@ -273,7 +283,6 @@ html,body{
   text-wrap: balance;
   display: inline-block;
   margin: 0 auto;
-  text-shadow: none;
 }
 
 /* Big date and guest use the same font and scale as the title */
@@ -284,6 +293,7 @@ html,body{
   font-style: normal;
   /* Match the title's sizing */
   font-size: clamp(32px, 9vw, 120px);
+  padding: 1em;
   line-height: 1;
   color: var(--navy);
   letter-spacing: .02em;
@@ -293,7 +303,6 @@ html,body{
   transition: opacity .6s ease;
   margin: 0;
   text-align: center;
-  text-shadow: none;
   white-space: nowrap;    /* force single line */
   max-width: 100%;
   display: block;
@@ -456,9 +465,7 @@ html,body{
   #altitude-guest{
     transition: text-shadow .6s ease;
     transform: scale(1.2);
-    text-shadow:
-      0 0 6px rgba(255,255,255,.28),
-      0 0 2px rgba(255,255,255,.55);
+
   }
   .skier-svg{
     transform: translateY(20vh) scale(1.15);
@@ -496,4 +503,70 @@ html,body{
 @keyframes snow-loop{
   0%   { transform: translateY(-100%); }  /* start above the screen */
   100% { transform: translateY(100%); }   /* end below the screen */
+}
+
+/* ===== Centered speaker overlay ===== */
+#sound-overlay{
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  z-index: 100;           /* above all */
+  pointer-events: none;   /* non-interactive */
+  opacity: 0;
+  transition: opacity .25s ease;
+}
+#sound-overlay.show{ opacity: 1; }
+#sound-overlay svg{
+  width: clamp(160px, 32vw, 360px);
+  height: auto;
+  color: #e6f7ff; /* currentColor for strokes/fills */
+  filter: drop-shadow(0 0 12px rgba(230,247,255,.45));
+}
+#sound-overlay .spk{
+  fill: currentColor;
+  stroke: currentColor;
+  stroke-width: .75;
+}
+
+#sound-overlay .bar{
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0; /* default hidden */
+}
+/* Two-keyframe approach to get 0 bars -> 1 bar -> 2 bars, twice */
+@keyframes speakerBars1 {
+  0%{   opacity:0 }
+  16%{  opacity:1 }  /* first cycle: show inner */
+  33%{  opacity:1 }  /* first cycle: keep inner when outer shows */
+  50%{  opacity:0 }  /* reset */
+  66%{  opacity:1 }  /* second cycle: show inner */
+  83%{  opacity:1 }  /* keep inner while outer shows */
+  100%{ opacity:0 }  /* end hidden */
+}
+@keyframes speakerBars2 {
+  0%{   opacity:0 }
+  16%{  opacity:0 }  /* outer still hidden while inner shows */
+  33%{  opacity:1 }  /* first cycle: show outer (2 bars) */
+  50%{  opacity:0 }  /* reset */
+  66%{  opacity:0 }  /* outer hidden while inner shows again */
+  83%{  opacity:1 }  /* second cycle: show outer (2 bars) */
+  100%{ opacity:0 }  /* end hidden */
+}
+/* When we add .play to the SVG, animate both bars once */
+#sound-overlay .play .bar1{
+  animation: speakerBars1 1.8s ease-out 0s 1 both;
+}
+#sound-overlay .play .bar2{
+  animation: speakerBars2 1.8s ease-out 0s 1 both;
+}
+
+/* Optional utility: apply Zapfino (or similar) anywhere */
+.zapfino{
+  font-family: "Zapfino", "Apple Chancery", "Snell Roundhand", "Great Vibes", "Brush Script MT", "Segoe Script", cursive;
+  line-height: 1.2;
+  letter-spacing: 0.02em;
 }

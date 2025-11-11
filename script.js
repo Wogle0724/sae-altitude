@@ -38,39 +38,43 @@ options.forEach(btn => {
     const altitudeFlash = document.getElementById('altitude-flash');
     const bgm = document.getElementById('bgm');
     const BIG_DATE_TEXT  = 'SAT · DEC 5 · 10:00 PM';
-    const BIG_GUEST_TEXT = 'FT. Aidan Emerson, AMXLIA';
+    const BIG_GUEST_TEXT = 'FT. EMERSON, AMXLIA';
 
     btn.classList.add('correct');
 
     // 1) Fade to black
     blackout.classList.add('visible');
 
+    //HERE
+    setTimeout(() => {
+      quiz.classList.add('hidden');
+      showCenteredSpeaker();
+    }, 1000);
 
     // After blackout, hide the quiz so it won't show when we fade back in
     setTimeout(() => {
-      quiz.classList.add('hidden');
       playBgm({ volume: 0.4, fadeMs: 2000, loop: true });
-    }, 800);
+    }, 1300);
 
     // === New flow ===
     // T+2.6s: neon blink/glitch "SAE Presents" in and out over black
     setTimeout(() => {
       neonBlink(presents, { inMs: 1100, holdMs: 500, outMs: 900, out: true });
-    }, 2600);
+    }, 3600);
 
     setTimeout(() => {
       // Glitch in snow wrapper (then start the run)
       neonBlink(snow, { inMs: 900, holdMs: 0, out: false });
       snow.classList.add('run');
       blackout.classList.remove('visible');
-    }, 8600);
+    }, 9600);
 
     // T+5s: start snowfall (still black), then reveal bg & skier and lift blackout
     setTimeout(() => {
       // Glitch in background and skier (no fades)
       neonBlink(bg, { inMs: 900, holdMs: 0, out: false });
       setTimeout(() => { neonBlink(skierSvg, { inMs: 900, holdMs: 0, out: false }); }, 200);
-    }, 11000);
+    }, 12000);
 
     // T+13s: show centered ALTITUDE title big, then flash each line in/out with gaps
     setTimeout(() => {
@@ -107,7 +111,7 @@ options.forEach(btn => {
         altitudeFlash.textContent = 'ALTITUDE';
         startRandomAltitudeFlash(altitudeFlash);
       })();
-    }, 13000);
+    }, 14000);
   });
 });
 
@@ -298,3 +302,124 @@ window.addEventListener('resize', () => {
     shrinkToFitOneLine(guestEl, { minPx: 24, paddingFactor: 0.98 });
   }
 });
+
+/**
+ * Create and animate a small speaker "sound on" SVG in the bottom-right.
+ * The icon cycles through 0 bars → 1 bar → 2 bars (twice), then fades out.
+ */
+function showSoundOnIcon(){
+  const el = createSoundIconSVG();
+  document.body.appendChild(el);
+
+  // animate: 0 bars → 1 bar → 2 bars, repeat twice
+  (async () => {
+    const bar1 = el.querySelector('[data-bar="1"]');
+    const bar2 = el.querySelector('[data-bar="2"]');
+
+    // fade in icon
+    requestAnimationFrame(() => { el.style.opacity = 1; });
+
+    // ensure starting state (no bars)
+    bar1.style.opacity = 0;
+    bar2.style.opacity = 0;
+
+    for (let cycle = 0; cycle < 2; cycle++){
+      // no bars
+      bar1.style.opacity = 0; 
+      bar2.style.opacity = 0; 
+      await sleep(220);
+
+      // one bar
+      bar1.style.opacity = 1; 
+      bar2.style.opacity = 0; 
+      await sleep(220);
+
+      // two bars
+      bar1.style.opacity = 1; 
+      bar2.style.opacity = 1; 
+      await sleep(260);
+    }
+
+    // fade out and remove
+    el.style.opacity = 0;
+    await sleep(250);
+    el.remove();
+  })();
+}
+
+/**
+ * Builds a compact speaker SVG with two sound bars.
+ * Positioned with inline styles to avoid stylesheet edits.
+ */
+function createSoundIconSVG(){
+  const svgns = 'http://www.w3.org/2000/svg';
+  const svg = document.createElementNS(svgns, 'svg');
+  svg.setAttribute('viewBox', '0 0 24 24');
+  svg.setAttribute('width', '28');
+  svg.setAttribute('height', '28');
+  svg.setAttribute('aria-hidden', 'true');
+
+  // Inline positioning (avoid touching CSS files)
+  svg.style.position = 'fixed';
+  svg.style.right = '16px';
+  svg.style.bottom = '16px';
+  svg.style.opacity = '0';
+  svg.style.transition = 'opacity .25s ease';
+  svg.style.zIndex = '13';
+  svg.style.color = '#e6f7ff';     // currentColor for strokes/fills
+  svg.style.filter = 'drop-shadow(0 0 6px rgba(230,247,255,.35))';
+
+  // Speaker body (uses currentColor)
+  const body = document.createElementNS(svgns, 'polygon');
+  body.setAttribute('points', '3,10 7,10 11,7 11,17 7,14 3,14');
+  body.setAttribute('fill', 'currentColor');
+  body.setAttribute('stroke', 'currentColor');
+  body.setAttribute('stroke-width', '0.75');
+
+  // Bars share stroke styling
+  const mkBar = (d, which) => {
+    const p = document.createElementNS(svgns, 'path');
+    p.setAttribute('d', d);
+    p.setAttribute('fill', 'none');
+    p.setAttribute('stroke', 'currentColor');
+    p.setAttribute('stroke-width', '2');
+    p.setAttribute('stroke-linecap', 'round');
+    p.setAttribute('stroke-linejoin', 'round');
+    p.setAttribute('opacity', '0');           // start hidden
+    p.setAttribute('data-bar', String(which)); // "1" or "2"
+    return p;
+  };
+
+  // Small and large arcs emanating from ~x=14..17, centered on y=12
+  const bar1 = mkBar('M14 9 A3 3 0 0 1 14 15', 1);   // inner arc
+  const bar2 = mkBar('M17 7 A6 6 0 0 1 17 17', 2);   // outer arc
+
+  svg.appendChild(body);
+  svg.appendChild(bar1);
+  svg.appendChild(bar2);
+
+  return svg;
+}
+
+/**
+ * Show the large, centered speaker overlay and run the 0→1→2 bars sequence twice.
+ * The CSS keyframes encapsulate the bar timing; we simply toggle classes and hide after.
+ */
+function showCenteredSpeaker(){
+  const overlay = document.getElementById('sound-overlay');
+  const svg = document.getElementById('speaker-inline');
+  if (!overlay || !svg) return;
+  // show overlay
+  overlay.classList.add('show');
+  // trigger bar animation
+  svg.classList.remove('play'); // reset if needed
+  // next frame to ensure keyframes restart
+  requestAnimationFrame(() => {
+    svg.classList.add('play');
+  });
+  // hide after animation completes (duration 1.8s) + a small cushion
+  setTimeout(() => {
+    overlay.classList.remove('show');
+    svg.classList.remove('play');
+  }, 2000);
+}
