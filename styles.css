@@ -33,7 +33,7 @@ html,body{
   inset:0;
   background-image: url('assets/background.svg');
   background-size: cover;        /* fill the entire viewport */
-  background-position: right center;   /* center focal point */
+  background-position: 70% center;   /* move focal point ~70% from left (shifted right) */
   background-repeat: no-repeat;
   z-index:0;
 }
@@ -272,7 +272,7 @@ html,body{
   /* Fallback: viewport-based size */
   font-size: clamp(32px, 9vw, 120px);
   line-height: 0.9;
-  color: var(--navy);
+  color: var(--light);
   letter-spacing: .02em;
   opacity: 0;
   transform: scale(0.85);
@@ -295,7 +295,7 @@ html,body{
   font-size: clamp(32px, 9vw, 120px);
   padding: 1em;
   line-height: 1;
-  color: var(--navy);
+  color: var(--light);
   letter-spacing: .02em;
   opacity: 0;
   transform: none;
@@ -459,16 +459,17 @@ html,body{
 /* ---------- Responsive tweaks ---------- */
 @media (max-width: 640px){
   .options{ grid-template-columns: 1fr; }
-  #mountain{ width: 130vw; }
   #altitude-title,
   #altitude-date,
   #altitude-guest{
     transition: text-shadow .6s ease;
     transform: scale(1.2);
-
+    text-shadow:
+    0 0 6px rgba(255,255,255,.2),
+    0 0 2px rgba(255,255,255,.40);
   }
   .skier-svg{
-    transform: translateY(20vh) scale(1.15);
+    transform: translateY(58vh) scale(1.15);
   }
   #presents{
     transform: scale(1.4);
