@@ -105,10 +105,9 @@ html,body{
 
 /* Make the correct answer (ALTITUDE) use the script stack even without extra class */
 .options button[data-correct="true"]{
-  font-family: "Zapfino", "Apple Chancery", "Snell Roundhand", "Great Vibes", "Brush Script MT", "Segoe Script", cursive;
-  font-size: 0.7em;
+  font-family: "monte-stella-turbo", sans-serif;
+  font-size: 1.3em;
   padding: 0;
-  padding-top: 0.6em;
 }
  .option:hover{
    transform: translateY(-1px);

@@ -109,7 +109,7 @@ options.forEach(btn => {
   
         // Start continuous random flashing ALTITUDE on loop over black
         altitudeFlash.textContent = 'ALTITUDE';
-        startRandomAltitudeFlash(altitudeFlash);
+        startRandomAltitudeFlash(altitudeFlash, ['ALTITUDE', BIG_DATE_TEXT]);
       })();
     }, 14000);
   });
@@ -154,12 +154,20 @@ function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
  * Start a continuous random flash loop for an element using neonBlink.
  * Returns a stopper function if needed in the future.
  */
-function startRandomAltitudeFlash(el){
+function startRandomAltitudeFlash(el, texts = ['ALTITUDE']){
   let running = true;
+  let idx = 0;                       // which text to show next
   (async () => {
     // Ensure glow base is applied
     el.classList.add('neon-base');
     while (running){
+      // Pick which text to display for this cycle
+      const nextText = (Array.isArray(texts) && texts.length)
+        ? texts[idx % texts.length]
+        : 'ALTITUDE';
+      el.textContent = nextText;
+      idx++;
+
       const inMs = 700 + Math.floor(Math.random()*500);   // 700–1200ms
       const holdMs = 150 + Math.floor(Math.random()*400); // 150–550ms
       const outMs = 500 + Math.floor(Math.random()*500);  // 500–1000ms
