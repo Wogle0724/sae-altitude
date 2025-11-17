@@ -37,7 +37,10 @@ options.forEach(btn => {
     const presents = document.getElementById('presents');
     const altitudeFlash = document.getElementById('altitude-flash');
     const bgm = document.getElementById('bgm');
-    const BIG_DATE_TEXT  = 'SAT · DEC 5 · 10:30 PM';
+    const sky = document.getElementById('sky');
+    const sun = document.getElementById('sun');
+    const moon = document.getElementById('moon');
+    const BIG_DATE_TEXT  = 'SAT · DEC 5';
     const BIG_GUEST_TEXT = 'FT. EMERSON, AMXLIA';
 
     btn.classList.add('correct');
@@ -66,14 +69,48 @@ options.forEach(btn => {
       // Glitch in snow wrapper (then start the run)
       neonBlink(snow, { inMs: 900, holdMs: 0, out: false });
       snow.classList.add('run');
+
       blackout.classList.remove('visible');
     }, 9600);
 
     // T+5s: start snowfall (still black), then reveal bg & skier and lift blackout
     setTimeout(() => {
-      // Glitch in background and skier (no fades)
+      // Bring in the layered sky overlay in its daytime position
+      if (sky){
+        sky.classList.add('visible');
+        neonBlink(sky, { inMs: 900, holdMs: 0, out: false });
+      }
+
+      // Fade in the sun together with the sky so the celestial appears with it
+      if (sun){
+        sun.classList.add('show');
+      }
+      // Glitch in background and skier (daytime scene)
       neonBlink(bg, { inMs: 900, holdMs: 0, out: false });
-      setTimeout(() => { neonBlink(skierSvg, { inMs: 900, holdMs: 0, out: false }); }, 200);
+      setTimeout(() => {
+        neonBlink(skierSvg, { inMs: 900, holdMs: 0, out: false });
+      }, 200);
+
+      // After a short delay, transition from day to night:
+      // - sky slides from the lighter bottom into the darker top
+      // - background crossfades from day to night
+      // - sun sets (falls away)
+      // - moon rises into view
+      setTimeout(() => {
+        setTimeout(() => {
+          bg.classList.add('to-night');
+        }, 2000);
+        if (sky){
+          sky.classList.add('to-night');
+        }
+        if (sun){
+          sun.classList.add('set');
+        }
+        if (moon){
+          moon.classList.add('show');
+          moon.classList.add('rise');
+        }
+      }, 2600); // start the day-to-night transition after the initial glitch-in
     }, 12000);
 
     // T+13s: show centered ALTITUDE title big, then flash each line in/out with gaps

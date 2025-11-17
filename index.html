@@ -4,7 +4,9 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SAE</title>
-  <link rel="preload" as="image" href="assets/background.svg" />
+  <link rel="preload" as="image" href="assets/day-background.svg" />
+  <link rel="preload" as="image" href="assets/night-background.svg" />
+  <link rel="preload" as="image" href="assets/sky.svg" />
   <link rel="preload" as="image" href="assets/skier.svg" />
   <link rel="preload" as="image" href="assets/snow.svg" />
   <link rel="stylesheet" href="https://use.typekit.net/ccj1xho.css">
@@ -22,6 +24,20 @@
   <div id="presents" aria-hidden="true">SAE&nbsp;Presents</div>
   <div id="stage" aria-label="Animated mountain scene">
     <div id="bg" class="fadeable" aria-hidden="true"></div>
+
+    <!-- Sliding sky overlay (day -> sunset -> night) -->
+    <div id="sky" aria-hidden="true"></div>
+
+    <!-- Sun starts in the top-left, then falls away -->
+    <div id="sun" class="celestial" aria-hidden="true">
+      <img src="assets/sun.svg" alt="Sun" />
+    </div>
+
+    <!-- Moon rises in as night arrives -->
+    <div id="moon" class="celestial" aria-hidden="true">
+      <img src="assets/moon.svg" alt="Moon" />
+    </div>
+
     <!-- Skier follows the slope path -->
     <svg id="skier" class="skier-svg" viewBox="0 0 100 100" preserveAspectRatio="xMaxYMin meet" aria-hidden="true">      
       <defs>
@@ -61,7 +77,7 @@
   <!-- Quiz overlay -->
   <section id="quiz" role="dialog" aria-modal="true" aria-labelledby="q-text">
     <div class="quiz-card">
-      <h1 id="q-text">What's it called when the snow's falling, the bass is rising, and the party is reaching new heights?</h1>
+      <h1 id="q-text">What do you call a moonlit party to celebrate the last day of class?</h1>
       <div class="options" role="group" aria-label="Choices">
         <button class="option" data-correct="false">LATITUDE</button>
         <button class="option" data-correct="false">SUMMIT</button>
