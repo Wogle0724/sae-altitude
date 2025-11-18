@@ -31,54 +31,15 @@ html,body{
 #bg{
   position:absolute;
   inset:0;
-  background-image: url('assets/day-background.svg');
+  background-image: url('assets/background.svg');
   background-size: cover;
   background-position: 70% center;
   background-repeat: no-repeat;
   z-index:2;
   overflow:hidden;
 }
-#bg::before{
-  content:"";
-  position:absolute;
-  inset:0;
-  background-image: url('assets/night-background.svg');
-  background-size: cover;
-  background-position: 70% center;
-  background-repeat: no-repeat;
-  opacity:0;
-  transition: opacity 3s ease-in-out;
-}
-#bg.to-night::before{
-  opacity:1;
-}
 
-#sky{
-  position:absolute;
-  left:50%;
-  top:-25vh;                      /* overflow above the viewport */
-  width:120vw;                    /* fill beyond both sides to avoid gaps */
-  height:calc(100vh + 25vh);      /* cover viewport plus the overflow */
-  transform:translateX(-50%);
-  z-index:0;
-  background-image: url('assets/sky.svg');
-  background-repeat: no-repeat;
-  background-position: center bottom; /* start on the lighter daytime half */
-  background-size: 100% auto;      /* force the image to fill the width and keep aspect */
-  mix-blend-mode: screen;
-  opacity:0;
-  transition: opacity 1.5s ease, background-position 6s ease-in-out;
-  pointer-events:none;
-  overflow: visible;
-}
-#sky.visible{
-  opacity:1;
-}
-#sky.to-night{
-  background-position: center 0%; /* slide up through sunset into night */
-}
-
-
+ 
 .skier-svg{
   position:absolute;
   inset:0;
@@ -93,44 +54,6 @@ html,body{
 
 .skier-svg.visible{ opacity: 1; }
 
-/* ---------- Celestial bodies ---------- */
-.celestial{
-  position:absolute;
-  width: clamp(72px, 10vw, 120px);
-  height: clamp(72px, 10vw, 120px);
-  opacity:0;
-  transition: transform 4s ease-in-out, opacity 2s ease-in-out;
-  pointer-events:none;
-  z-index:1;
-}
-#sun{
-  top: 8vh;
-  left: 8vw;
-  transform: translateY(0) scale(1);
-}
-#moon{
-  top: 2vh;                         /* start slightly above the sun */
-  left: 8vw;
-  transform: translateY(-40vh) scale(0.8); /* start well above, will drop into place */
-}
-#sun img,
-#moon img{
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  display:block;
-}
-.celestial.show{
-  opacity:1;
-}
-#sun.set{
-  transform: translateY(40vh) scale(0.8);
-  opacity:0;
-}
-#moon.rise{
-  transform: translateY(0) scale(1);
-  opacity:1;
-}
 
 /* ---------- Quiz ---------- */
 #quiz{
@@ -476,7 +399,8 @@ html,body{
 #blackout.visible{ opacity: 1; }
 
 /* ---------- "SAE Presents" overlay ---------- */
-#presents{
+#presents,
+#intro-line{
   position: fixed;
   inset: 0;
   display: grid;
@@ -486,15 +410,26 @@ html,body{
   opacity: 0;
   /* allow neon effect without relying on opacity transition */
   transition: none;
+  color: var(--text);
+  text-align: center;
+}
+#intro-line{
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: clamp(18px, 3.4vw, 32px);
+  letter-spacing: 0.08em;
+  text-transform: none;
+  text-shadow: none;
+  transition: opacity .8s ease;
+}
+#presents{
   font-family: "monte-stella-turbo", sans-serif;
   font-weight: 800;
   font-style: normal;
   font-size: clamp(28px, 6vw, 84px);
   letter-spacing: .02em;
-  color: var(--text);
-  text-align: center;
 }
-#presents.visible{ opacity: 1; }
+#presents.visible,
+#intro-line.visible{ opacity: 1; }
 
 /* Full-screen ALTITUDE flash overlay (uses title font + presents glow) */
 #altitude-flash{

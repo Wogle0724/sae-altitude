@@ -21,22 +21,11 @@
 </head>
 <body>
   <div id="blackout" aria-hidden="true"></div>
+  <div id="intro-line" aria-hidden="true">We Invite you to celebrate the last day of class</div>
   <div id="presents" aria-hidden="true">SAE&nbsp;Presents</div>
   <div id="stage" aria-label="Animated mountain scene">
     <div id="bg" class="fadeable" aria-hidden="true"></div>
-
-    <!-- Sliding sky overlay (day -> sunset -> night) -->
-    <div id="sky" aria-hidden="true"></div>
-
-    <!-- Sun starts in the top-left, then falls away -->
-    <div id="sun" class="celestial" aria-hidden="true">
-      <img src="assets/sun.svg" alt="Sun" />
-    </div>
-
-    <!-- Moon rises in as night arrives -->
-    <div id="moon" class="celestial" aria-hidden="true">
-      <img src="assets/moon.svg" alt="Moon" />
-    </div>
+    <link rel="preload" as="image" href="assets/background.svg" />
 
     <!-- Skier follows the slope path -->
     <svg id="skier" class="skier-svg" viewBox="0 0 100 100" preserveAspectRatio="xMaxYMin meet" aria-hidden="true">      

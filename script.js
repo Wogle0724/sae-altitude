@@ -34,12 +34,10 @@ options.forEach(btn => {
     const snow = document.getElementById('snow-wrap');
     const blackout = document.getElementById('blackout');
     const skierSvg = document.getElementById('skier');
+    const introLine = document.getElementById('intro-line');
     const presents = document.getElementById('presents');
     const altitudeFlash = document.getElementById('altitude-flash');
     const bgm = document.getElementById('bgm');
-    const sky = document.getElementById('sky');
-    const sun = document.getElementById('sun');
-    const moon = document.getElementById('moon');
     const BIG_DATE_TEXT  = 'SAT · DEC 5';
     const BIG_GUEST_TEXT = 'FT. EMERSON, AMXLIA';
 
@@ -48,107 +46,22 @@ options.forEach(btn => {
     // 1) Fade to black
     blackout.classList.add('visible');
 
-    //HERE
+    // After a brief pause, hide quiz and show the invitation line with a typewriter effect.
+    // Once it finishes (including a suspenseful pause and fade out),
+    // show the centered speaker, start the music and the existing neon / SAE Presents sequence.
     setTimeout(() => {
       quiz.classList.add('hidden');
-      showCenteredSpeaker();
-    }, 1000);
-
-    // After blackout, hide the quiz so it won't show when we fade back in
-    setTimeout(() => {
-      playBgm({ volume: 0.4, fadeMs: 2000, loop: true });
-    }, 1300);
-
-    // === New flow ===
-    // T+2.6s: neon blink/glitch "SAE Presents" in and out over black
-    setTimeout(() => {
-      neonBlink(presents, { inMs: 1100, holdMs: 500, outMs: 900, out: true });
-    }, 3600);
-
-    setTimeout(() => {
-      // Glitch in snow wrapper (then start the run)
-      neonBlink(snow, { inMs: 900, holdMs: 0, out: false });
-      snow.classList.add('run');
-
-      blackout.classList.remove('visible');
-    }, 9600);
-
-    // T+5s: start snowfall (still black), then reveal bg & skier and lift blackout
-    setTimeout(() => {
-      // Bring in the layered sky overlay in its daytime position
-      if (sky){
-        sky.classList.add('visible');
-        neonBlink(sky, { inMs: 900, holdMs: 0, out: false });
-      }
-
-      // Fade in the sun together with the sky so the celestial appears with it
-      if (sun){
-        sun.classList.add('show');
-      }
-      // Glitch in background and skier (daytime scene)
-      neonBlink(bg, { inMs: 900, holdMs: 0, out: false });
-      setTimeout(() => {
-        neonBlink(skierSvg, { inMs: 900, holdMs: 0, out: false });
-      }, 200);
-
-      // After a short delay, transition from day to night:
-      // - sky slides from the lighter bottom into the darker top
-      // - background crossfades from day to night
-      // - sun sets (falls away)
-      // - moon rises into view
-      setTimeout(() => {
-        setTimeout(() => {
-          bg.classList.add('to-night');
-        }, 2000);
-        if (sky){
-          sky.classList.add('to-night');
+      runInvitationLine(introLine, {
+        onDone: () => {
+          showCenteredSpeaker();
+          // Wait for the speaker animation (~1.8s) to finish before starting SAE Presents + ALTITUDE flow
+          setTimeout(() => {
+            playBgm({ volume: 0.4, fadeMs: 2000, loop: true });
+            scheduleNeonSequence();
+          }, 2000);
         }
-        if (sun){
-          sun.classList.add('set');
-        }
-        if (moon){
-          moon.classList.add('show');
-          moon.classList.add('rise');
-        }
-      }, 2600); // start the day-to-night transition after the initial glitch-in
-    }, 12000);
-
-    // T+13s: show centered ALTITUDE title big, then flash each line in/out with gaps
-    setTimeout(() => {
-      altitudeContainer.classList.add('visible');
-      altitudeContainer.setAttribute('aria-hidden', 'false');
-  
-      (async () => {
-        // Title flashes in, then out
-        title.classList.add('show');
-        await neonBlink(title, { inMs: 900, holdMs: 400, outMs: 700, out: true });
-        await sleep(2000);
-  
-        // Date flashes in, then out
-        dateBig.textContent = BIG_DATE_TEXT;
-        dateBig.classList.add('show');
-        dateBig.setAttribute('aria-hidden', 'false');
-        shrinkToFitOneLine(dateBig, { minPx: 24, paddingFactor: 0.98 });
-        await neonBlink(dateBig, { inMs: 900, holdMs: 400, outMs: 700, out: true });
-        await sleep(2000);
-  
-        // Guest flashes in, then out
-        guestBig.textContent = BIG_GUEST_TEXT;
-        guestBig.classList.add('show');
-        guestBig.setAttribute('aria-hidden', 'false');
-        shrinkToFitOneLine(guestBig, { minPx: 24, paddingFactor: 0.98 });
-        await neonBlink(guestBig, { inMs: 900, holdMs: 400, outMs: 700, out: true });
-        await sleep(2000);
-  
-        // Fade to black
-        blackout.classList.add('visible');
-        await sleep(800);
-  
-        // Start continuous random flashing ALTITUDE on loop over black
-        altitudeFlash.textContent = 'ALTITUDE';
-        startRandomAltitudeFlash(altitudeFlash, ['ALTITUDE', BIG_DATE_TEXT]);
-      })();
-    }, 14000);
+      });
+    }, 600);
   });
 });
 
@@ -186,6 +99,125 @@ function shrinkToFitOneLine(el, { minPx = 24, paddingFactor = 0.98 } = {}){
 }
 
 function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+
+/**
+ * Show a centered invitation line in a simple typewriter style over black.
+ * Types the text out, holds it for suspense, then fades it away.
+ */
+function runInvitationLine(el, { onDone } = {}){
+  if (!el){
+    if (typeof onDone === 'function') onDone();
+    return;
+  }
+  // Use the text already in the DOM if present; otherwise fall back to a default.
+  const fullText = (el.textContent || '').trim() ||
+    'We invite you to celebrate the last day of class';
+
+  el.textContent = '';
+  el.classList.remove('neon-base', 'neon-in', 'neon-out', 'visible');
+  el.style.opacity = 1;
+  el.style.transition = 'opacity 800ms ease';
+  el.setAttribute('aria-hidden', 'false');
+
+  (async () => {
+    // Type each character
+    for (let i = 0; i < fullText.length; i++){
+      el.textContent += fullText[i];
+      await sleep(55);  // typing speed
+    }
+
+    // Hold on the full line for suspense
+    await sleep(2200);
+
+    // Fade it away
+    el.style.opacity = 0;
+    await sleep(800);
+    el.setAttribute('aria-hidden', 'true');
+
+    if (typeof onDone === 'function') onDone();
+  })();
+}
+
+/**
+ * After the invitation line sequence completes, this schedules the original
+ * neon flow: "SAE Presents" over black, full-screen ALTITUDE flash,
+ * then snow/bg/skier reveal and big ALTITUDE/date/guest sequence.
+ */
+function scheduleNeonSequence(){
+  const presents        = document.getElementById('presents');
+  const altitudeFlash   = document.getElementById('altitude-flash');
+  const snow            = document.getElementById('snow-wrap');
+  const blackout        = document.getElementById('blackout');
+  const bg              = document.getElementById('bg');
+  const skierSvg        = document.getElementById('skier');
+  const altitudeContainer = document.getElementById('altitude-container');
+  const title           = document.getElementById('altitude-title');
+  const dateBig         = document.getElementById('altitude-date');
+  const guestBig        = document.getElementById('altitude-guest');
+  const BIG_DATE_TEXT   = 'SAT · DEC 5';
+  const BIG_GUEST_TEXT  = 'FT. EMERSON, AMXLIA';
+
+  // T0+0.4s: "SAE Presents" over black
+  setTimeout(() => {
+    neonBlink(presents, { inMs: 1100, holdMs: 500, outMs: 900, out: true });
+  }, 400);
+
+  // T0+3.4s: big "ALTITUDE" wordmark over black
+  setTimeout(() => {
+    altitudeFlash.textContent = 'ALTITUDE';
+    neonBlink(altitudeFlash, { inMs: 1100, holdMs: 500, outMs: 900, out: true });
+  }, 3400);
+
+  // T0+6.8s: glitch in snow wrapper (then start the run) and lift blackout
+  setTimeout(() => {
+    neonBlink(snow, { inMs: 900, holdMs: 0, out: false });
+    snow.classList.add('run');
+    blackout.classList.remove('visible');
+  }, 6800);
+
+  // T0+9.2s: reveal bg & skier
+  setTimeout(() => {
+    neonBlink(bg, { inMs: 900, holdMs: 0, out: false });
+    neonBlink(skierSvg, { inMs: 900, holdMs: 0, out: false });
+  }, 9200);
+
+  // T0+11.2s: show centered ALTITUDE title big, then flash each line in/out with gaps
+  setTimeout(() => {
+    altitudeContainer.classList.add('visible');
+    altitudeContainer.setAttribute('aria-hidden', 'false');
+
+    (async () => {
+      // Title flashes in, then out
+      title.classList.add('show');
+      await neonBlink(title, { inMs: 900, holdMs: 400, outMs: 700, out: true });
+      await sleep(2000);
+
+      // Date flashes in, then out
+      dateBig.textContent = BIG_DATE_TEXT;
+      dateBig.classList.add('show');
+      dateBig.setAttribute('aria-hidden', 'false');
+      shrinkToFitOneLine(dateBig, { minPx: 24, paddingFactor: 0.98 });
+      await neonBlink(dateBig, { inMs: 900, holdMs: 400, outMs: 700, out: true });
+      await sleep(2000);
+
+      // Guest flashes in, then out
+      guestBig.textContent = BIG_GUEST_TEXT;
+      guestBig.classList.add('show');
+      guestBig.setAttribute('aria-hidden', 'false');
+      shrinkToFitOneLine(guestBig, { minPx: 24, paddingFactor: 0.98 });
+      await neonBlink(guestBig, { inMs: 900, holdMs: 400, outMs: 700, out: true });
+      await sleep(2000);
+
+      // Fade to black
+      blackout.classList.add('visible');
+      await sleep(800);
+
+      // Start continuous random flashing ALTITUDE on loop over black
+      altitudeFlash.textContent = 'ALTITUDE';
+      startRandomAltitudeFlash(altitudeFlash, ['ALTITUDE', BIG_DATE_TEXT]);
+    })();
+  }, 11200);
+}
 
 /**
  * Start a continuous random flash loop for an element using neonBlink.
