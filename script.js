@@ -196,7 +196,7 @@ function scheduleNeonSequence(){
   const title           = document.getElementById('altitude-title');
   const dateBig         = document.getElementById('altitude-date');
   const guestBig        = document.getElementById('altitude-guest');
-  const BIG_DATE_TEXT   = 'SAT · DEC 5';
+  const BIG_DATE_TEXT   = 'FRI · DEC 5';
   const BIG_GUEST_TEXT  = 'FT. EMERSON, AMXLIA';
 
   // T0+0.4s: "SAE Presents" over black
