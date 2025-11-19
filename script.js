@@ -78,7 +78,7 @@ options.forEach(btn => {
     const presents = document.getElementById('presents');
     const altitudeFlash = document.getElementById('altitude-flash');
     const bgm = document.getElementById('bgm');
-    const BIG_DATE_TEXT  = 'SAT · DEC 5';
+    const BIG_DATE_TEXT  = 'FRI · DEC 5';
     const BIG_GUEST_TEXT = 'FT. EMERSON, AMXLIA';
 
     btn.classList.add('correct');
