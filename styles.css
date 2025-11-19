@@ -241,8 +241,9 @@ html,body{
   align-self: center;
   margin: 0;                  /* remove vertical offset */
   text-shadow:
-  0 0 6px rgba(255,255,255,.28),
-  0 0 2px rgba(255,255,255,.55);
+    0 0 0.04em rgba(255,255,255,.9),
+    0 0 0.12em rgba(173,216,230,.8),
+    0 0 0.35em rgba(143,211,255,.7);
 }
 
 /* While centered, give the title its own inline padding so letters never clip,
@@ -274,7 +275,7 @@ html,body{
   /* Fallback: viewport-based size */
   font-size: clamp(32px, 9vw, 120px);
   line-height: 0.9;
-  color: var(--light);
+  color: var(--text);
   letter-spacing: .02em;
   opacity: 0;
   transform: scale(0.85);
@@ -297,7 +298,7 @@ html,body{
   font-size: clamp(32px, 9vw, 120px);
   padding: 1em;
   line-height: 1;
-  color: var(--light);
+  color: var(--text);
   letter-spacing: .02em;
   opacity: 0;
   transform: none;

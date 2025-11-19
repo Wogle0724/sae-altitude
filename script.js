@@ -201,27 +201,21 @@ function scheduleNeonSequence(){
 
   // T0+0.4s: "SAE Presents" over black
   setTimeout(() => {
-    neonBlink(presents, { inMs: 1100, holdMs: 500, outMs: 900, out: true });
-  }, 400);
-
-  // T0+3.4s: big "ALTITUDE" wordmark over black
-  setTimeout(() => {
-    altitudeFlash.textContent = 'ALTITUDE';
-    neonBlink(altitudeFlash, { inMs: 1100, holdMs: 500, outMs: 900, out: true });
-  }, 3400);
+    neonBlink(presents, { inMs: 1100, holdMs: 700, outMs: 900, out: true });
+  }, 500);
 
   // T0+6.8s: glitch in snow wrapper (then start the run) and lift blackout
   setTimeout(() => {
     neonBlink(snow, { inMs: 900, holdMs: 0, out: false });
     snow.classList.add('run');
     blackout.classList.remove('visible');
-  }, 6800);
+  }, 4800);
 
   // T0+9.2s: reveal bg & skier
   setTimeout(() => {
     neonBlink(bg, { inMs: 900, holdMs: 0, out: false });
     neonBlink(skierSvg, { inMs: 900, holdMs: 0, out: false });
-  }, 9200);
+  }, 7200);
 
   // T0+11.2s: show centered ALTITUDE title big, then flash each line in/out with gaps
   setTimeout(() => {
@@ -258,7 +252,7 @@ function scheduleNeonSequence(){
       altitudeFlash.textContent = 'ALTITUDE';
       startRandomAltitudeFlash(altitudeFlash, ['ALTITUDE', BIG_DATE_TEXT]);
     })();
-  }, 11200);
+  }, 9200);
 }
 
 /**
