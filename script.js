@@ -16,11 +16,29 @@ function primeBgmFromGesture(){
   const el = document.getElementById('bgm');
   if (!el || bgmPrimed) return;
   try{
+    // Play once while muted to satisfy iOS "user gesture" requirement,
+    // then immediately pause and reset so no sound is heard yet.
     el.loop = true;
-    el.volume = 0;
+    el.muted = true;
     el.currentTime = 0;
-    el.play();          // allowed because we're still in the click/tap handler
+    const playPromise = el.play();
     bgmPrimed = true;
+
+    if (playPromise && typeof playPromise.then === 'function'){
+      playPromise.then(() => {
+        el.pause();
+        el.currentTime = 0;
+        el.muted = false;   // ready for real playback later
+      }).catch(() => {
+        // ignore; we'll just rely on later playBgm attempt
+        el.muted = false;
+      });
+    }else{
+      // Fallback for older browsers: pause immediately
+      el.pause();
+      el.currentTime = 0;
+      el.muted = false;
+    }
   }catch(e){
     // If the browser still blocks this, fail silently.
   }
@@ -358,17 +376,18 @@ async function playBgm(opts = {}){
   if (!el) return;
   try{
     el.loop = loop;
+    el.currentTime = startAt;
+    el.volume = 0;
 
-    // If this is the first time and we somehow didn't prime in the click,
-    // try to start quietly here (desktop will allow it).
-    if (!bgmPrimed){
-      el.currentTime = startAt;
-      el.volume = 0;
-      await el.play();
-      bgmPrimed = true;
+    // Start (or restart) playback at the precise moment we want audio,
+    // even on mobile. Because we've already "primed" via a prior gesture,
+    // this call should now be allowed.
+    const playPromise = el.play();
+    if (playPromise && typeof playPromise.then === 'function'){
+      await playPromise;
     }
 
-    // Now fade to the target volume
+    // Now fade to the target volume, giving the same timing as desktop.
     await audioFadeIn(el, volume, fadeMs);
   }catch(e){
     // Some browsers may still block play() depending on settings; fail silently.
