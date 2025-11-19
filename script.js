@@ -2,7 +2,29 @@
 const quiz = document.getElementById('quiz');
 const options = Array.from(document.querySelectorAll('.option'));
 const badge = document.getElementById('answer-badge');
+
 const info = document.getElementById('info');
+
+let bgmPrimed = false;
+
+/**
+ * Prime the background music from within a user gesture.
+ * On iOS/mobile, audio.play() must be called directly in a click/tap handler.
+ * We start it muted here and fade it in later.
+ */
+function primeBgmFromGesture(){
+  const el = document.getElementById('bgm');
+  if (!el || bgmPrimed) return;
+  try{
+    el.loop = true;
+    el.volume = 0;
+    el.currentTime = 0;
+    el.play();          // allowed because we're still in the click/tap handler
+    bgmPrimed = true;
+  }catch(e){
+    // If the browser still blocks this, fail silently.
+  }
+}
 
 options.forEach(btn => {
   btn.addEventListener('click', () => {
@@ -42,6 +64,8 @@ options.forEach(btn => {
     const BIG_GUEST_TEXT = 'FT. EMERSON, AMXLIA';
 
     btn.classList.add('correct');
+    // Prime the audio while we're still in the user gesture for mobile browsers
+    primeBgmFromGesture();
 
     // 1) Fade to black
     blackout.classList.add('visible');
@@ -334,9 +358,17 @@ async function playBgm(opts = {}){
   if (!el) return;
   try{
     el.loop = loop;
-    el.currentTime = startAt;
-    el.volume = 0;
-    await el.play();             // requires user gesture (your click provides it)
+
+    // If this is the first time and we somehow didn't prime in the click,
+    // try to start quietly here (desktop will allow it).
+    if (!bgmPrimed){
+      el.currentTime = startAt;
+      el.volume = 0;
+      await el.play();
+      bgmPrimed = true;
+    }
+
+    // Now fade to the target volume
     await audioFadeIn(el, volume, fadeMs);
   }catch(e){
     // Some browsers may still block play() depending on settings; fail silently.
